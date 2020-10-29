@@ -1,7 +1,4 @@
 --[[
-    Author: Spynaz
-    Description: Cloudframe 2.0 server module
-
     Quick API ref:
     loadLibrary(string name)
     require(string name)
@@ -12,7 +9,7 @@
 
 local Server = {}
 
-local sharedFolder = game.ReplicatedStorage.CloudFrameShared
+local sharedFolder = game.ReplicatedStorage.FrameShared
 local sharedLibraries = sharedFolder.Libraries
 local serverLibraries = script.Parent.Libraries
 
