@@ -2,7 +2,7 @@ local defaultParameters = {
 	repeats = math.huge
 	
 }
-local Main = require(game.ReplicatedStorage.CloudFrameShared.Main)
+local Main = require(game.ReplicatedStorage.FrameShared.Main)
 
 local Class = Main.loadLibrary("Class")
 local Cryo = Main.loadLibrary("Cryo")
