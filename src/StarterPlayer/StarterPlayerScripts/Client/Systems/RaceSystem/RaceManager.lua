@@ -18,6 +18,54 @@ local PlayerFrame = game.ReplicatedStorage:WaitForChild("PlayerFrame")
 
 local RaceManager = {}
 
+local sortedStandings = {}
+
+local function showStandings(playersInPrix, sortedBy, points)
+    Scoreboard:ClearAllChildren()
+    Scoreboard.Visible = true
+    sortedStandings = {}
+    for playerName, participant in next, playersInPrix do 
+        local playerObject = game.Players:FindFirstChild(playerName)
+        if playerObject then 
+            sortedStandings[participant[sortedBy]] = {
+                participant = participant;
+                playerName = playerName
+            } 
+        end
+    end
+    for index, playerClass in next, sortedStandings do 
+        local playerName = playerClass.playerName
+        local participant = playerClass.participant
+        print(participant.currentStanding)
+        local playerObject = game.Players:FindFirstChild(playerName)
+        if not playerObject then return end
+        local newPlayerFrame = PlayerFrame:Clone()
+        local PlayerEmblem = newPlayerFrame:WaitForChild("PlayerEmblem")
+        local Placement = newPlayerFrame:WaitForChild("Placement")
+        local PlayerName = newPlayerFrame:WaitForChild("PlayerName")
+        local Points = newPlayerFrame:WaitForChild("Points")
+        PlayerName.Text = playerName
+        local placementText = participant[sortedBy].."th" 
+        local placementColor = Color3.new(1,1,1)
+        local placementTextData = PlacementText[participant[sortedBy]] 
+        if placementTextData then 
+            placementText = placementTextData.text
+            placementColor =placementTextData.color
+        end
+        Placement.Text = placementText
+        Placement.TextColor3 = placementColor
+        Points.Text = participant[points].." pts"
+        PlayerEmblem.Image = game.Players:GetUserThumbnailAsync(playerObject.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size180x180)
+        newPlayerFrame.Name = index
+        newPlayerFrame.Parent = Scoreboard
+        newPlayerFrame.Position = UDim2.new(0,0,1,0)
+        newPlayerFrame:TweenPosition(
+            UDim2.new(0,0, 0,40*participant[sortedBy], Enum.EasingDirection.In, Enum.EasingStyle.Sine, 0.35, true)
+        )
+        wait(0.35)
+    end
+end 
+
 function RaceManager.init()
     TimerLabel.Visible = true 
     StartRaceTimer.OnClientEvent:Connect(function(amountOfTime)
@@ -44,48 +92,19 @@ function RaceManager.init()
     end)
 
     ShowRaceStandings.OnClientEvent:Connect(function(playersInPrix)
-        Scoreboard:ClearAllChildren()
-        Scoreboard.Visible = true
-        local sortedStandings = {}
-
-        for playerName, participant in next, playersInPrix do 
-            sortedStandings[participant.lastRecordedRaceStanding] = {
-                participant = participant;
-                playerName = playerName
-            } 
-        end
-        for index, playerClass in next, sortedStandings do 
-            local playerName = playerClass.playerName
-            local participant = playerClass.participant
-            local playerObject = game.Players:FindFirstChild(playerName)
-            if not playerObject then return end
-            local newPlayerFrame = PlayerFrame:Clone()
-            local PlayerEmblem = newPlayerFrame:WaitForChild("PlayerEmblem")
-            local Placement = newPlayerFrame:WaitForChild("Placement")
-            local PlayerName = newPlayerFrame:WaitForChild("PlayerName")
-            local Points = newPlayerFrame:WaitForChild("Points")
-            PlayerName.Text = playerName
-            local placementText = participant.lastRecordedRaceStanding.."th" 
-            local placementColor = Color3.new(1,1,1)
-            local placementTextData = PlacementText[participant.lastRecordedRaceStanding] 
-            if placementTextData then 
-                placementText = placementTextData.text
-                placementColor =placementTextData.color
-            end
-            Placement.Text = placementText
-            Placement.TextColor3 = placementColor
-            Points.Text = participant.lastRecordedRacePoints.." pts"
-            PlayerEmblem.Image = game.Players:GetUserThumbnailAsync(playerObject.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size180x180)
-            newPlayerFrame.Name = participant.lastRecordedRaceStanding
-            newPlayerFrame.Parent = Scoreboard
-            newPlayerFrame.Position = UDim2.new(0,0,1,0)
-            newPlayerFrame:TweenPosition(
-                UDim2.new(0,0, 0,40*participant.lastRecordedRaceStanding, Enum.EasingDirection.In, Enum.EasingStyle.Sine, 0.35, true)
-            )
+        showStandings(playersInPrix, "lastRecordedRaceStanding", "lastRecordedRacePoints")
+        wait(3)
+        for index, value in next, sortedStandings do 
+            local playerFrame = Scoreboard:FindFirstChild(index)
+            print(playerFrame)
+            playerFrame:TweenPosition(
+                UDim2.new(0,0,0,1, Enum.EasingDirection.In, Enum.EasingStyle.Sine, 0.35, true)
+            )   
             wait(0.35)
         end
+        showStandings(playersInPrix, "currentStanding", "amountOfPoints")
         wait(5)
-        
+        Scoreboard.Visible = false
     end)
 end 
 

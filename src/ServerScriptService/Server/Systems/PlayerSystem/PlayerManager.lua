@@ -14,6 +14,7 @@ function PlayerManager.init()
     end)
 
     game.Players.PlayerRemoving:Connect(function(playerObject)
+        local gameState = GameStateManager:getState()
         if gameState == "Grand Prix" then 
             GrandPrixManager.removePlayerFromPrix(playerObject)
         end
