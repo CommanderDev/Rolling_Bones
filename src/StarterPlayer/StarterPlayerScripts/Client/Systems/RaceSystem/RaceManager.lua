@@ -14,6 +14,7 @@ local playerObject = game.Players.LocalPlayer
 local PlayerGui = playerObject:WaitForChild("PlayerGui")
 local Interface = PlayerGui:WaitForChild("Interface")
 local TimerLabel = Interface:WaitForChild("TimerLabel")
+local RaceTimerLabel = Interface:WaitForChild("RaceTimerLabel")
 local Scoreboard = Interface:WaitForChild("Scoreboard")
 
 local PlayerFrame = game.ReplicatedStorage:WaitForChild("PlayerFrame")
@@ -25,12 +26,21 @@ local sortedStandings = {}
 local function showStandings(playersInPrix, sortedBy, points)
     Scoreboard:ClearAllChildren()
     Scoreboard.Visible = true
-    Scoreboard.CanVasSize = UDim2.new(0,0,0,0)
+    Scoreboard.CanvasSize = UDim2.new(0,0,0,0)
     sortedStandings = {}
+    local dnfNumber = 0
     for playerName, participant in next, playersInPrix do 
         local playerObject = game.Players:FindFirstChild(playerName)
         if playerObject then 
-            sortedStandings[participant[sortedBy]] = {
+            local sortby = participant[sortedBy]
+            print(sortedBy)
+            if not sortby then 
+                dnfNumber += 1 
+                participant[sortedBy] = 30+dnfNumber
+                participant[points] = 0
+                sortby = participant[sortedBy]
+            end 
+            sortedStandings[sortby] = {
                 participant = participant;
                 playerName = playerName
             } 
@@ -88,6 +98,7 @@ function RaceManager.init()
     end)
 
     ShowRaceStandings.OnClientEvent:Connect(function(playersInPrix)
+        --RaceTimerLabel.Visible = false
         showStandings(playersInPrix, "lastRecordedRaceStanding", "lastRecordedRacePoints")
         wait(3)
         for index, value in next, sortedStandings do 
