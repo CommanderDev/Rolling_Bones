@@ -2,7 +2,7 @@ local Main = require(game.ServerScriptService.FrameServer.Main)
 
 local StartRaceTimer = Main.getDataStream("StartRaceTimer", "RemoteEvent")
 local RaceTimeUpdater = Main.getDataStream("RaceTimeUpdater", "RemoteEvent")
-local RaceTimer = Main.getDataStream("RaceTimer", "RemoteEvent")
+--local RaceTimer = Main.getDataStream("RaceTimer", "RemoteEvent")
 
 local Class = Main.loadLibrary("Class")
 local Timer = Main.loadLibrary("Timer")
@@ -135,7 +135,7 @@ function Race:handleRaceTimer()
             currentSeconds -= 1
             currentMiliseconds = 30
         end
-        RaceTimer:FireAllClients(currentMinutes, currentSeconds, currentMiliseconds)
+        --RaceTimer:FireAllClients(currentMinutes, currentSeconds, currentMiliseconds)
     end
 end 
 
