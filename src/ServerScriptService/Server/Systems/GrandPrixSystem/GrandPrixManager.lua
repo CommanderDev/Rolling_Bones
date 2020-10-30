@@ -10,7 +10,7 @@ local Timer = Main.loadLibrary("Timer")
 local GameStateManager = Main.require("GameStateManager")
 local GrandPrix = Main.require("GrandPrix")
 
-local numberRequired = 2
+local numberRequired = 1
 
 local intermissionTime = 15
 

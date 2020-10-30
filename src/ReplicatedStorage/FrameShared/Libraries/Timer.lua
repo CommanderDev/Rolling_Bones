@@ -48,7 +48,7 @@ function Timer:startTimer()
 	self.heartbeatConnection = RunService.Heartbeat:Connect(function(deltaTime)
 		self.timeElasped = os.clock() - self.startTime
 		self.timeLeft = math.round(self.length - self.timeElasped)
-
+		
 		if self.timeElasped >= self.length then 
 			self.timeLeft = 0
 			self:initilize()

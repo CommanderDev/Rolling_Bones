@@ -2,6 +2,7 @@ local Main = require(game.ServerScriptService.FrameServer.Main)
 
 local StartRaceTimer = Main.getDataStream("StartRaceTimer", "RemoteEvent")
 local RaceTimeUpdater = Main.getDataStream("RaceTimeUpdater", "RemoteEvent")
+local RaceTimer = Main.getDataStream("RaceTimer", "RemoteEvent")
 
 local Class = Main.loadLibrary("Class")
 local Timer = Main.loadLibrary("Timer")
@@ -114,6 +115,30 @@ function Race:connectCheckpoints()
     end
 end
 
+function Race:handleRaceTimer()
+    local currentMiliseconds = 30
+    local currentSeconds = 60 
+    local currentMinutes = 4;
+    while wait(1/1000) do 
+        if currentMinutes <= 0 and currentSeconds <= 0 and currentMiliseconds <= 0 then 
+            self:endRace()
+            break
+        end
+        currentMiliseconds -= 1
+        if currentSeconds <= 0 and currentMinutes > 0 and currentMiliseconds <= 1 then 
+            currentMinutes -= 1 
+            currentSeconds = 59
+            currentMiliseconds = 30
+        end
+        if currentMiliseconds < 0 then 
+            currentMinutes -= 1
+            currentSeconds -= 1
+            currentMiliseconds = 30
+        end
+        RaceTimer:FireAllClients(currentMinutes, currentSeconds, currentMiliseconds)
+    end
+end 
+
 function Race:startRace()
     StartRaceTimer:FireAllClients(countdownTime)
     self:movePlayersToStartingPoint()
@@ -137,6 +162,7 @@ function Race:startRace()
                 self:connectFinishline()
                 self:connectKillingParts()
                 self:connectCheckpoints()
+                self:handleRaceTimer()
             end
         end;
         subroutines = {
