@@ -2,6 +2,7 @@ local Main = require(game.ServerScriptService.FrameServer.Main)
 
 local ShowRaceStandings = Main.getDataStream("ShowRaceStandings", "RemoteEvent")
 local IntermissionUpdater = Main.getDataStream("IntermissionUpdater", "RemoteEvent")
+local RaceIntermissionUpdater = Main.getDataStream("RaceIntermissionUpdater", "RemoteEvent")
 local PrixEndedEvent = Main.getDataStream("PrixEnded", "RemoteEvent")
 
 local Class = Main.loadLibrary("Class")
@@ -38,7 +39,6 @@ function GrandPrix:createNextRace()
 end
 
 function GrandPrix:startPrix()
-    self.currentStage += 1
     coroutine.wrap(function()
         for index = 1, maxPerPrix do 
             local randomMap = math.random(1, #Maps:GetChildren())
@@ -49,23 +49,23 @@ function GrandPrix:startPrix()
     for index, playerObject in next, game.Players:GetPlayers() do 
         self.playersInPrix[playerObject.Name] = Participant.new(playerObject)
     end
-    self:createNextRace()
+    self:beginNextRace()
 end 
 
 function GrandPrix:beginNextRace()
     IntermissionUpdater:FireAllClients(raceCooldownTimer)
+    self.currentStage += 1
     local intermissionTimer = Timer.new({
         length = raceCooldownTimer;
         repeats = 0;
         callback = function()
-            self.currentStage += 1
             self:createNextRace()
         end;
         subroutines = {
             Timer.new({
-                length = 1;
+                length = 0;
                 callback = function(mainroutine, subroutine)
-                    IntermissionUpdater:FireAllClients(mainroutine.timeLeft)
+                    RaceIntermissionUpdater:FireAllClients(mainroutine.timeLeft, self.currentStage, maxPerPrix)
                 end;
             })
         }
@@ -80,7 +80,9 @@ function GrandPrix:raceEnded(playersInRace)
     end    
     Sort(self.currentStandings, "amountOfPoints")
     for index, participant in next, self.currentStandings do 
-        participant:updateStanding(index) 
+        if game.Players:FindFirstChild(participant.playerObject.Name) then 
+            participant:updateStanding(index) 
+        end
     end
     ShowRaceStandings:FireAllClients(self.playersInPrix)
     wait(12)
@@ -93,6 +95,7 @@ end
 
 function GrandPrix:prixEnded()
     PrixEndedEvent:FireAllClients(self.currentStandings[1].playerObject.Name)
+    Main.require("GrandPrixManager").prixEnded()
 end
 
 return GrandPrix

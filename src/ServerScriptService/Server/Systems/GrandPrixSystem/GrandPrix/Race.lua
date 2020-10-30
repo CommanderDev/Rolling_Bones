@@ -16,16 +16,17 @@ function Race.new(grandPrix)
     self.grandPrixClass = grandPrix
     self.currentMap = grandPrix.currentMap
     self.playersInRace = {}
-    self.amountInRace = 0;
     self.maxPointsAwarded = 0
     self.playersFinished = {}
     self.finishTouchConnection = nil 
     self.killingPartsConnections = {}
     self.checkpointConnections = {}
+    self.ongoing = true
     return self
 end
 
 function Race:endRace()
+    self.ongoing = false
     self.grandPrixClass:raceEnded(self.playersInRace)
     if self.finishTouchConnection then 
         self.finishTouchConnection:Disconnect()
@@ -40,10 +41,11 @@ function Race:endRace()
             checkpointConnection:Disconnect()
         end
     end
-    self = nil 
+    self = nil
 end 
 
 function Race:checkRaceStatus()
+    if not self.ongoing then return end
     local endRace = true 
     for playerName, playerData in next, self.playersInRace do 
         local playerObject = game.Players:FindFirstChild(playerName) 
@@ -117,7 +119,6 @@ function Race:startRace()
     self:movePlayersToStartingPoint()
     for index, participant in next, self.grandPrixClass.playersInPrix do 
         if participant then 
-            self.amountInRace += 1
             participant:changeMoveSpeed(0)
             self.maxPointsAwarded += 2
             self.playersInRace[participant.playerObject.Name] = {

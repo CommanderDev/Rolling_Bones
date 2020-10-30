@@ -9,14 +9,13 @@ local Participant = Class.new()
 Participant.changeWalkSpeedSignals = {}
 
 function Participant.new(playerObject)
-    print(playerObject.Name, " Is a participant in the prix")
     local self = setmetatable({}, Participant)
     self.playerObject = playerObject
     self.amountOfPoints = 0
     self.lastRecordedRaceStanding = nil
     self.lastRecordedRacePoints = nil
-    self.currentStanding = 0;
-    self.characterObject = playerObject.Character or playerObject.CharacterAdded
+    self.currentStanding = 0; 
+    self.characterObject = playerObject.Character or playerObject.CharacterAdded:Wait()
     self.lastTeleportedLocation = nil 
     return self 
 end 
@@ -28,6 +27,7 @@ function Participant:awardPoints(amountAwarded)
 end 
 
 function Participant:moveToPoint(pointCFrame)
+    print(self.characterObject)
     self.characterObject:WaitForChild("HumanoidRootPart").CFrame = pointCFrame + Vector3.new(0,2,0)
     self.lastTeleportedLocation = pointCFrame
 end 

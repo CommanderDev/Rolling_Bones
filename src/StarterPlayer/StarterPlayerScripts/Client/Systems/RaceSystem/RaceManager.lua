@@ -3,8 +3,10 @@ local Main = require(game.ReplicatedStorage.FrameShared.Main)
 local StartRaceTimer = Main.getDataStream("StartRaceTimer", "RemoteEvent")
 local RaceTimeUpdater = Main.getDataStream("RaceTimeUpdater", "RemoteEvent")
 local ShowRaceStandings = Main.getDataStream("ShowRaceStandings", "RemoteEvent")
+local RaceIntermissionUpdater = Main.getDataStream("RaceIntermissionUpdater", "RemoteEvent")
 
 local Timer = Main.loadLibrary("Timer")
+local RichText = Main.loadLibrary("RichText")
 
 local PlacementText = Main.require("PlacementText")
 
@@ -23,6 +25,7 @@ local sortedStandings = {}
 local function showStandings(playersInPrix, sortedBy, points)
     Scoreboard:ClearAllChildren()
     Scoreboard.Visible = true
+    Scoreboard.CanVasSize = UDim2.new(0,0,0,0)
     sortedStandings = {}
     for playerName, participant in next, playersInPrix do 
         local playerObject = game.Players:FindFirstChild(playerName)
@@ -62,6 +65,7 @@ local function showStandings(playersInPrix, sortedBy, points)
         newPlayerFrame:TweenPosition(
             UDim2.new(0,0, 0,40*participant[sortedBy], Enum.EasingDirection.In, Enum.EasingStyle.Sine, 0.35, true)
         )
+        Scoreboard.CanvasSize = UDim2.new(0,0,0,index+newPlayerFrame.Size.Y.Offset)
         wait(0.35)
     end
 end 
@@ -75,14 +79,6 @@ function RaceManager.init()
             callback = function()
                 TimerLabel.Visible = false
             end;
-            subroutines = {
-                Timer.new({
-                    length = 1;
-                    callback = function(mainroutine)
-                        TimerLabel.Text = mainroutine.timeLeft
-                    end;
-                })
-            }
         })
         raceTimer:startTimer()
     end)
@@ -105,6 +101,25 @@ function RaceManager.init()
         showStandings(playersInPrix, "currentStanding", "amountOfPoints")
         wait(5)
         Scoreboard.Visible = false
+    end)
+    
+    RaceIntermissionUpdater.OnClientEvent:Connect(function(timeLeft, raceNumber, maxPerPrix)
+        TimerLabel.Visible = true
+        local raceNumberText = RichText.new(raceNumber, {
+            bold = true;
+            font = {
+                size = 55;
+                color = Color3.fromRGB(255,179, 0);   
+            }
+        })
+        local maxPerPrixText = RichText.new(maxPerPrix, {
+            bold = true;
+            font = {
+                size = 55;
+                color = Color3.fromRGB(255,179, 0);   
+            }
+        })
+        TimerLabel.Text = "Race ("..raceNumberText:get().."/"..maxPerPrixText:get()..") starts in "..timeLeft
     end)
 end 
 

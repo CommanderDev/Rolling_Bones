@@ -3,40 +3,31 @@ local Main = require(game.ServerScriptService.FrameServer.Main)
 local StartPrixEvent = Main.getDataStream("StartPrixEvent", "RemoteEvent")
 local StartRace = Main.getDataStream("StartRace", "RemoteEvent")
 local IntermissionUpdater = Main.getDataStream("IntermissionUpdater", "RemoteEvent")
+local WaitingEvent = Main.getDataStream("WaitingEvent", "RemoteEvent")
 
 local Timer = Main.loadLibrary("Timer")
 
 local GameStateManager = Main.require("GameStateManager")
 local GrandPrix = Main.require("GrandPrix")
-local playersInPrix = {}
-local numberInPrix = 0
 
-local numberRequired = 1
+local numberRequired = 2
 
-local chosenMaps = {}
-local currentStage = 0
-
-local intermissionTime = 5
-
-local maxPointsAwarded = 20
-
-local map 
-
-local placements = {}
-local unfinishedPlayers = {}
+local intermissionTime = 15
 
 local currentPrix 
 
 local GrandPrixManager = {}
 
 local function updatePrixStatus()
-    if numberInPrix >= numberRequired then 
+    if #game.Players:GetPlayers() >= numberRequired then 
+        print("Starting prix!")
         GameStateManager:setState("Intermission")
         IntermissionUpdater:FireAllClients(intermissionTime)
         local intermissionTimer = Timer.new({
             length = intermissionTime;
             repeats = 0;
             callback = function()
+                IntermissionUpdater:FireAllClients(false)
                 currentPrix = GrandPrix.new()
                 currentPrix:startPrix()
                 GameStateManager:setState("Grand Prix")
@@ -51,11 +42,18 @@ local function updatePrixStatus()
             }
         })
         intermissionTimer:startTimer()
+    else
+        WaitingEvent:FireAllClients(numberRequired)
     end 
 end 
 
+function GrandPrixManager.prixEnded()
+    wait(5)
+    updatePrixStatus()
+end 
+
+
 function GrandPrixManager.addPlayerToPrix(playerObject)
-    numberInPrix += 1
     updatePrixStatus()
 end 
 
@@ -65,9 +63,9 @@ function GrandPrixManager.removePlayerFromPrix(playerObject)
     if participant then 
         participant:Destroy()
         currentPrix.playersInPrix[playerObject.Name] = nil
-        print(currentPrix.currentRaceClass.amountInRace)
-        currentPrix.currentRaceClass.amountInRace -= 1
-        currentPrix.currentRaceClass:checkRaceStatus()
+        if currentPrix.currentRaceClass then 
+            currentPrix.currentRaceClass:checkRaceStatus()
+        end 
     end
 end 
 
