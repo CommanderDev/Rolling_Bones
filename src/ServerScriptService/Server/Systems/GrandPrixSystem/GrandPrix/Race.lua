@@ -7,6 +7,8 @@ local RaceTimeUpdater = Main.getDataStream("RaceTimeUpdater", "RemoteEvent")
 local Class = Main.loadLibrary("Class")
 local Timer = Main.loadLibrary("Timer")
 
+local Participant = Main.require("Participant")
+
 local LobbySpawns = Main.getPath(workspace, "LobbySpawns")
 
 local countdownTime = 3
@@ -41,6 +43,15 @@ function Race:endRace()
         if checkpointConnection then 
             checkpointConnection:Disconnect()
         end
+    end
+    for playerName, participant in next, self.grandPrixClass.playersInPrix do 
+        local playerObject = game.Players:GetPlayerFromCharacter(characterObject)
+        if playerObject then
+            local randomSpawn = math.random(1, #LobbySpawns:GetChildren())
+            local randomLocation = LobbySpawns:GetChildren()[randomSpawn].CFrame
+            local participant = self.grandPrixClass.playersInPrix[playerObject.Name]
+            participant:moveToPoint(randomLocation)
+        end 
     end
     self = nil
 end 
@@ -116,28 +127,32 @@ function Race:connectCheckpoints()
 end
 
 function Race:handleRaceTimer()
-    local currentMiliseconds = 30
-    local currentSeconds = 60 
-    local currentMinutes = 4;
-    while wait(1/1000) do 
-        if currentMinutes <= 0 and currentSeconds <= 0 and currentMiliseconds <= 0 then 
-            self:endRace()
-            break
+    local currentMiliseconds = 0
+    local currentSeconds = 0
+    local currentMinutes = 3;
+    coroutine.wrap(function()
+        Participant.toggleTimerVisible:fire(true)
+        while wait(1/1000) do 
+            if not self.ongoing then Participant.toggleTimerVisible:fire(false) break end
+            if currentMinutes <= 0 and currentSeconds <= 0 and currentMiliseconds <= 0 then 
+                Participant.toggleTimerVisible:fire(false)
+                self:endRace()
+                break
+            end
+            currentMiliseconds -= 1
+            if currentSeconds <= 0 and currentMinutes > 0 and currentMiliseconds <= 1 then 
+                currentMinutes -= 1 
+                currentSeconds = 59
+                currentMiliseconds = 30
+            end
+            if currentMiliseconds < 0 then 
+                currentSeconds -= 1
+                currentMiliseconds = 30
+            end
+            Participant.updateTimer:fire(currentMinutes, currentSeconds, currentMiliseconds)
         end
-        currentMiliseconds -= 1
-        if currentSeconds <= 0 and currentMinutes > 0 and currentMiliseconds <= 1 then 
-            currentMinutes -= 1 
-            currentSeconds = 59
-            currentMiliseconds = 30
-        end
-        if currentMiliseconds < 0 then 
-            currentMinutes -= 1
-            currentSeconds -= 1
-            currentMiliseconds = 30
-        end
-        --RaceTimer:FireAllClients(currentMinutes, currentSeconds, currentMiliseconds)
-    end
-end 
+    end)()
+end
 
 function Race:startRace()
     StartRaceTimer:FireAllClients(countdownTime)
