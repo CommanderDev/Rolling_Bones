@@ -41,7 +41,7 @@ end
 
 
 function GrandPrix:raceEnded(playersInRace) 
-    ShowRaceStandings:FireAllClients(self.playersInPrix)
+    ShowRaceStandings:FireAllClients(self.playersInPrix)    
 end 
 
 return GrandPrix
