@@ -12,6 +12,12 @@ function PlayerManager.init()
             GrandPrixManager.addPlayerToPrix(playerObject)
         end
     end)
+
+    game.Players.PlayerRemoving:Connect(function(playerObject)
+        if gameState == "Grand Prix" then 
+            GrandPrixManager.removePlayerFromPrix(playerObject)
+        end
+    end)
 end 
 
 return PlayerManager

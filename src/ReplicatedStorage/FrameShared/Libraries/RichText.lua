@@ -67,7 +67,7 @@
 	end
 --]]
 
-local Main = require(game.ReplicatedStorage.CloudFrameShared.Main)
+local Main = require(game.ReplicatedStorage.FrameShared.Main)
 local Signal = Main.loadLibrary("Signal")
 
 local RichText = {}
