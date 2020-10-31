@@ -74,10 +74,6 @@ function Participant:activateRagdoll()
     Ragdoll:Activate(self.playerObject.Character)
 end
 
-function Participant:deactiveRagdoll()
-    Ragdoll:Deactivate(self.playerObject.Character)
-end
-
 function Participant:Destroy()
     --self = nil
 end 
