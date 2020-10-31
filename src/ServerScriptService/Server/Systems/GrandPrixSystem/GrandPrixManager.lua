@@ -1,7 +1,5 @@
 local Main = require(game.ServerScriptService.FrameServer.Main)
 
-local StartPrixEvent = Main.getDataStream("StartPrixEvent", "RemoteEvent")
-local StartRace = Main.getDataStream("StartRace", "RemoteEvent")
 local IntermissionUpdater = Main.getDataStream("IntermissionUpdater", "RemoteEvent")
 local WaitingEvent = Main.getDataStream("WaitingEvent", "RemoteEvent")
 
@@ -20,7 +18,6 @@ local GrandPrixManager = {}
 
 local function updatePrixStatus()
     if #game.Players:GetPlayers() >= numberRequired then 
-        print("Starting prix!")
         GameStateManager:setState("Intermission")
         IntermissionUpdater:FireAllClients(intermissionTime)
         local intermissionTimer = Timer.new({

@@ -94,7 +94,7 @@ function Race:connectFinishline()
             self.playersInRace[playerObject.Name].finished = true
             self.maxPointsAwarded -= 2
             table.insert(self.playersFinished, playerObject)
-            participant:finishedRace(#self.playersFinished)
+            participant:finishedRace(#self.playersFinished, self.currentMinutes, self.currentSeconds, self.currentMiliseconds)
             self:checkRaceStatus()
         end
     end)   
@@ -127,29 +127,29 @@ function Race:connectCheckpoints()
 end
 
 function Race:handleRaceTimer()
-    local currentMiliseconds = 0
-    local currentSeconds = 0
-    local currentMinutes = 3;
+    self.currentMiliseconds = 0
+    self.currentSeconds = 0
+    self.currentMinutes = 3;
     coroutine.wrap(function()
         Participant.toggleTimerVisible:fire(true)
         while wait(1/1000) do 
             if not self.ongoing then Participant.toggleTimerVisible:fire(false) break end
-            if currentMinutes <= 0 and currentSeconds <= 0 and currentMiliseconds <= 0 then 
+            if self.currentMinutes <= 0 and self.currentSeconds <= 0 and self.currentMiliseconds <= 0 then 
                 Participant.toggleTimerVisible:fire(false)
                 self:endRace()
                 break
             end
-            currentMiliseconds -= 1
-            if currentSeconds <= 0 and currentMinutes > 0 and currentMiliseconds <= 1 then 
-                currentMinutes -= 1 
-                currentSeconds = 59
-                currentMiliseconds = 30
+            self.currentMiliseconds -= 1
+            if self.currentSeconds <= 0 and self.currentMinutes > 0 and self.currentMiliseconds <= 1 then 
+                self.currentMinutes -= 1 
+                self.currentSeconds = 59
+                self.currentMiliseconds = 30
             end
-            if currentMiliseconds < 0 then 
-                currentSeconds -= 1
-                currentMiliseconds = 30
+            if self.currentMiliseconds < 0 then 
+                self.currentSeconds -= 1
+                self.currentMiliseconds = 30
             end
-            Participant.updateTimer:fire(currentMinutes, currentSeconds, currentMiliseconds)
+            Participant.updateTimer:fire(self.currentMinutes, self.currentSeconds, self.currentMiliseconds)
         end
     end)()
 end
@@ -185,7 +185,6 @@ function Race:startRace()
                 length = 0.25;
                 callback = function(mainroutine)
                     RaceTimeUpdater:FireAllClients(mainroutine.timeLeft)
-                    --updatePlayerTimers(mainroutine.timeLeft)
                 end
             })
         }

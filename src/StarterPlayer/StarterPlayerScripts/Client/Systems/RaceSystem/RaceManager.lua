@@ -1,3 +1,5 @@
+local ContentProvider = game:GetService("ContentProvider")
+
 local Main = require(game.ReplicatedStorage.FrameShared.Main)
 
 local StartRaceTimer = Main.getDataStream("StartRaceTimer", "RemoteEvent")
@@ -33,7 +35,6 @@ local function showStandings(playersInPrix, sortedBy, points)
         local playerObject = game.Players:FindFirstChild(playerName)
         if playerObject then 
             local sortby = participant[sortedBy]
-            print(sortedBy)
             if not sortby then 
                 dnfNumber += 1 
                 participant[sortedBy] = 30+dnfNumber
@@ -46,6 +47,7 @@ local function showStandings(playersInPrix, sortedBy, points)
             } 
         end
     end
+
     for index, playerClass in next, sortedStandings do 
         local playerName = playerClass.playerName
         local participant = playerClass.participant
@@ -57,6 +59,7 @@ local function showStandings(playersInPrix, sortedBy, points)
         local Placement = newPlayerFrame:WaitForChild("Placement")
         local PlayerName = newPlayerFrame:WaitForChild("PlayerName")
         local Points = newPlayerFrame:WaitForChild("Points")
+        local TimeElasped = newPlayerFrame:WaitForChild("TimeElasped")
         PlayerName.Text = playerName
         local placementText = participant[sortedBy].."th" 
         local placementColor = Color3.new(1,1,1)
@@ -64,16 +67,22 @@ local function showStandings(playersInPrix, sortedBy, points)
         if placementTextData then 
             placementText = placementTextData.text
             placementColor =placementTextData.color
+            newPlayerFrame:FindFirstChild("Medal"..index).Visible = true
         end
         Placement.Text = placementText
         Placement.TextColor3 = placementColor
         Points.Text = participant[points].." pts"
+        local lastRecordedRaceTime = participant.lastRecordedRaceTime
+        local minutes = lastRecordedRaceTime.minutes
+        local seconds = lastRecordedRaceTime.seconds 
+        local miliseconds = lastRecordedRaceTime.miliseconds
+        TimeElasped.Text = ("%02d:%02d:%02d"):format(minutes, seconds, miliseconds)
         PlayerEmblem.Image = game.Players:GetUserThumbnailAsync(playerObject.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size180x180)
         newPlayerFrame.Name = index
         newPlayerFrame.Parent = Scoreboard
-        newPlayerFrame.Position = UDim2.new(0,0,1,0)
+        newPlayerFrame.Position = UDim2.new(0.21,0,1,0)
         newPlayerFrame:TweenPosition(
-            UDim2.new(0,0, 0,40*participant[sortedBy], Enum.EasingDirection.In, Enum.EasingStyle.Sine, 0.35, true)
+            UDim2.new(0.21,0, 0,60*participant[sortedBy], Enum.EasingDirection.In, Enum.EasingStyle.Sine, 0.35, true)
         )
         Scoreboard.CanvasSize = UDim2.new(0,0,0,index+newPlayerFrame.Size.Y.Offset)
         wait(0.35)
@@ -98,14 +107,13 @@ function RaceManager.init()
     end)
 
     ShowRaceStandings.OnClientEvent:Connect(function(playersInPrix)
-        --RaceTimerLabel.Visible = false
         showStandings(playersInPrix, "lastRecordedRaceStanding", "lastRecordedRacePoints")
         wait(3)
         for index, value in next, sortedStandings do 
             local playerFrame = Scoreboard:FindFirstChild(index)
             print(playerFrame)
             playerFrame:TweenPosition(
-                UDim2.new(0,0,0,1, Enum.EasingDirection.In, Enum.EasingStyle.Sine, 0.35, true)
+                UDim2.new(0.21,0,1,0, Enum.EasingDirection.In, Enum.EasingStyle.Sine, 0.35, true)
             )   
             wait(0.35)
         end
