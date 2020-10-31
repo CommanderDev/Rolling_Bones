@@ -17,6 +17,8 @@ function Participant.new(playerObject)
     self.amountOfPoints = 0
     self.lastRecordedRaceStanding = false
     self.lastRecordedRacePoints = false
+    self.lastRecordedRaceTime = false 
+
     self.currentStanding = 0; 
     self.characterObject = playerObject.Character or playerObject.CharacterAdded:Wait()
     self.lastTeleportedLocation = nil 
@@ -57,10 +59,21 @@ function Participant:updateStanding(newStanding)
     self.currentStanding = newStanding
 end 
 
-function Participant:finishedRace(placement)
+function Participant:finishedRace(placement, minutes, seconds, miliseconds)
     if not self.playerObject then return end
     self.lastRecordedRaceStanding = placement
+    self.lastRecordedRaceTime = {
+        minutes = minutes; 
+        seconds = seconds;
+        miliseconds = miliseconds
+    }
     PlayerFinishedRace:FireClient(self.playerObject,placement)
+end 
+
+function Participant:raceStarted()
+    self.lastRecordedRaceStanding = false 
+    self.lastRecordedRacePoints = false 
+    self.lastRecordedRaceTime = false
 end 
 
 function Participant:changeMoveSpeed(newSpeed) 
