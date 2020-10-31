@@ -75,7 +75,7 @@ function Race:movePlayersToStartingPoint()
         local availablePoints = self.currentMap.StartPoints:GetChildren()
         local randomPoint = math.random(1,#availablePoints)
         local playerPoint = availablePoints[randomPoint]
-        participant:moveToPoint(playerPoint.CFrame)
+        participant:moveToPoint(playerPoint.CFrame + Vector3.new(0,5,0)) 
         playerPoint:Destroy()
     end
     self.currentMap.StartPoints:Destroy()
@@ -161,7 +161,7 @@ function Race:startRace()
         if participant then 
             participant:changeMoveSpeed(0)
             participant:raceStarted()
-            participant:activateRagdoll()
+            --participant:activateRagdoll()
             self.maxPointsAwarded += 2
             self.playersInRace[participant.playerObject.Name] = {
                 finished = false;
