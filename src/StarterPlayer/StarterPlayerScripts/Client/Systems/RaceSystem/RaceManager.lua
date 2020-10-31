@@ -49,12 +49,13 @@ local function showStandings(playersInPrix, sortedBy, points)
         end
     end
 
+    local numberLoopedThrough = 0
     for index, playerClass in next, sortedStandings do 
         local playerName = playerClass.playerName
         local participant = playerClass.participant
-        print(participant.currentStanding)
         local playerObject = game.Players:FindFirstChild(playerName)
         if not playerObject then return end
+        numberLoopedThrough += 1
         local newPlayerFrame = PlayerFrame:Clone()
         local PlayerEmblem = newPlayerFrame:WaitForChild("PlayerEmblem")
         local Placement = newPlayerFrame:WaitForChild("Placement")
@@ -62,28 +63,32 @@ local function showStandings(playersInPrix, sortedBy, points)
         local Points = newPlayerFrame:WaitForChild("Points")
         local TimeElasped = newPlayerFrame:WaitForChild("TimeElasped")
         PlayerName.Text = playerName
-        local placementText = participant[sortedBy].."th" 
+        local placementText = numberLoopedThrough.."th" 
         local placementColor = Color3.new(1,1,1)
-        local placementTextData = PlacementText[participant[sortedBy]] 
+        local placementTextData = PlacementText[numberLoopedThrough] 
         if placementTextData then 
             placementText = placementTextData.text
             placementColor =placementTextData.color
-            newPlayerFrame:FindFirstChild("Medal"..index).Visible = true
+            newPlayerFrame:FindFirstChild("Medal"..numberLoopedThrough).Visible = true
         end
         Placement.Text = placementText
         Placement.TextColor3 = placementColor
         Points.Text = participant[points].." pts"
         local lastRecordedRaceTime = participant.lastRecordedRaceTime
-        local minutes = lastRecordedRaceTime.minutes
-        local seconds = lastRecordedRaceTime.seconds 
-        local miliseconds = lastRecordedRaceTime.miliseconds
-        TimeElasped.Text = ("%02d:%02d:%02d"):format(minutes, seconds, miliseconds)
+        if not lastRecordedRaceTime then 
+            TimeElasped.Text = "DNF"
+        else 
+            local minutes = lastRecordedRaceTime.minutes
+            local seconds = lastRecordedRaceTime.seconds 
+            local miliseconds = lastRecordedRaceTime.miliseconds
+            TimeElasped.Text = ("%02d:%02d:%02d"):format(minutes, seconds, miliseconds)
+        end 
         PlayerEmblem.Image = game.Players:GetUserThumbnailAsync(playerObject.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size180x180)
         newPlayerFrame.Name = index
         newPlayerFrame.Parent = Scoreboard
         newPlayerFrame.Position = UDim2.new(0.21,0,1,0)
         newPlayerFrame:TweenPosition(
-            UDim2.new(0.21,0, 0,60*participant[sortedBy], Enum.EasingDirection.In, Enum.EasingStyle.Sine, 0.35, true)
+            UDim2.new(0.21,0, 0,60*numberLoopedThrough, Enum.EasingDirection.In, Enum.EasingStyle.Sine, 0.35, true)
         )
         Scoreboard.CanvasSize = UDim2.new(0,0,0,index+newPlayerFrame.Size.Y.Offset)
         wait(0.35)
