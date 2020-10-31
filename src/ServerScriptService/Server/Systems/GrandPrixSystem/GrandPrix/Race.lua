@@ -160,6 +160,8 @@ function Race:startRace()
     for index, participant in next, self.grandPrixClass.playersInPrix do 
         if participant then 
             participant:changeMoveSpeed(0)
+            participant:raceStarted()
+            participant:activateRagdoll()
             self.maxPointsAwarded += 2
             self.playersInRace[participant.playerObject.Name] = {
                 finished = false;
