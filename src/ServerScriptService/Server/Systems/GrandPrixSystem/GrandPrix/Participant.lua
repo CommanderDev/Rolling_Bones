@@ -5,6 +5,7 @@ local PlayerFinishedRace = Main.getDataStream("PlayerFinishedRace", "RemoteEvent
 
 local Class = Main.loadLibrary("Class")
 local Signal = Main.loadLibrary("Signal")
+local Deactivate = game.ServerScriptService.Server.Systems.Ragdoll.Deactivate
 
 local Participant = Class.new()
 
@@ -50,10 +51,20 @@ function Participant:awardPoints(amountAwarded)
     self.lastRecordedRacePoints = amountAwarded
 end 
 
-function Participant:moveToPoint(pointCFrame)
-    print(self.characterObject)
-    self.characterObject:WaitForChild("HumanoidRootPart").CFrame = pointCFrame + Vector3.new(0,2,0)
-    self.lastTeleportedLocation = pointCFrame
+function Participant:moveToPoint(pointCFrame, endOfRace)
+    if endOfRace then
+        self:deactivateRagdoll()
+        print(self.characterObject)
+        self.characterObject:SetPrimaryPartCFrame(pointCFrame + Vector3.new(0,2.5,0))
+        self.lastTeleportedLocation = pointCFrame
+    else
+        self:deactivateRagdoll()
+        print(self.characterObject)
+        self.characterObject:SetPrimaryPartCFrame(pointCFrame + Vector3.new(0,2.5,0))
+        self.lastTeleportedLocation = pointCFrame
+        self:activateRagdoll()
+    end
+    
 end 
 
 function Participant:updateStanding(newStanding)
@@ -85,6 +96,10 @@ end
 
 function Participant:activateRagdoll()
     Ragdoll:Activate(self.playerObject.Character)
+end
+
+function Participant:deactivateRagdoll()
+    Deactivate:Fire(self.playerObject)
 end
 
 function Participant:Destroy()

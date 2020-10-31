@@ -16,7 +16,7 @@ local Maps = Main.getPath(game.ServerStorage, "Maps")
 
 local GrandPrix = Class.new()
 
-local raceCooldownTimer = 10
+local raceCooldownTimer = 2
 local maxPerPrix = 3
 
 function GrandPrix.new()
@@ -82,6 +82,7 @@ function GrandPrix:raceEnded(playersInRace)
     for index, participant in next, self.currentStandings do 
         if game.Players:FindFirstChild(participant.playerObject.Name) then 
             participant:updateStanding(index) 
+            participant:deactivateRagdoll()
         end
     end
     ShowRaceStandings:FireAllClients(self.playersInPrix)

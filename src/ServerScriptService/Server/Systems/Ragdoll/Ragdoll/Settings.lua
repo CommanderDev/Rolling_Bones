@@ -18,6 +18,7 @@ local Settings = {
 	["LIMITSENABLED"] = true;
 	["DESPAWNTYPE"] = "Random";
 	["EVENTLOCATION"] = game:GetService("ReplicatedStorage").Physics;
+	["ENDEVENTLOCATION"] = game.ServerScriptService.Server.Systems.Ragdoll.Deactivate;
 }
 
 return Settings

@@ -45,23 +45,6 @@ function Ragdoll.Activate(self, Model, DespawnTime, Constraint, CanDespawn, CanR
 	DetectRig(self) 
 end
 
-function Ragdoll.Deactivate(self, Model)
-	if not Model then
-		warn("[RAGDOLL]: Argument 1 (Model) not provided.")
-		return
-	end
-	
-	self.Player = Players:GetPlayerFromCharacter(Model);
-	self.Model = Model;
-	self.Humanoid = Model.Humanoid;
-	
-	self.Player:LoadCharacter()
-	--self.Humanoid:BuildRigFromAttachments()
-	--if self.Player then
-		--SettingsModule.EVENTLOCATION:FireClient(self.Player, self.Model, self.Humanoid, self.Player, true)
-	--end
-end
-
 function DetectRig(self)
 	if self.Humanoid.RigType == Enum.HumanoidRigType.R6 then
 		local NewAttachmentRight = Instance.new("Attachment")
@@ -122,7 +105,11 @@ end
 
 function RagdollModel(self)
 	
+	local chrCon
 	if self.Player then
+		chrCon = self.Player.CharacterAdded:Connect(function(chr)
+			self.Model = chr
+		end)
 		SettingsModule.EVENTLOCATION:FireClient(self.Player, self.Model, self.Humanoid, self.Player, false)
 	else
 		SettingsModule.EVENTLOCATION:FireAllClients(self.Model, self.Humanoid, self.Player, false)
@@ -136,11 +123,17 @@ function RagdollModel(self)
 		end
 	end
 	
-	local WeldConstraint = Instance.new("WeldConstraint")
+	local WeldConstraint = self.Model.PrimaryPart:FindFirstChild("WeldConstraint") or Instance.new("WeldConstraint")
 	WeldConstraint.Part0 = self.Model.PrimaryPart
 	WeldConstraint.Part1 = self.Model.UpperTorso
 	WeldConstraint.Parent = self.Model.PrimaryPart
 	
+	for i, v in pairs(self.Model:GetDescendants()) do
+		if v:IsA("BallSocketConstraint") then
+			v:Destroy()
+		end
+	end
+
 	for i, v in pairs(self.Parts) do
 		local Part = self.Model:FindFirstChild(i)
 		if Part then
@@ -180,16 +173,25 @@ function RagdollModel(self)
 		DespawnTypesModule.GetInfo(self.DespawnType)(self.Model, self.DespawnTime)
 		wait(0.5)
 		if self.Player then
+			print("HeRe")
 			self.Player:LoadCharacter()
 		end
 		return
 	end
 	if self.CanRecover then
-		wait(self.DespawnTime)
-		self.Humanoid:BuildRigFromAttachments()
-		if self.Player then
-			SettingsModule.EVENTLOCATION:FireClient(self.Player, self.Model, self.Humanoid, self.Player, true)
-		end
+		local con
+		con = SettingsModule.ENDEVENTLOCATION.Event:Connect(function(plr)
+			print("CONNECTION REACHED")
+			if plr == self.Player then
+				--self.Humanoid:BuildRigFromAttachments()
+				print("HERE")
+				if self.Player then
+					SettingsModule.EVENTLOCATION:FireClient(self.Player, self.Model, self.Humanoid, self.Player, true)
+				end
+				con:Disconnect()
+				chrCon:Disconnect()
+			end
+		end)
 		return
 	end
 end
