@@ -23,6 +23,7 @@ function Race.new(grandPrix)
     self.playersFinished = {}
     self.finishTouchConnection = nil 
     self.killingPartsConnections = {}
+    self.playersBeingKilled = {}
     self.checkpointConnections = {}
     self.ongoing = true
     return self
@@ -50,7 +51,7 @@ function Race:endRace()
             local randomSpawn = math.random(1, #LobbySpawns:GetChildren())
             local randomLocation = LobbySpawns:GetChildren()[randomSpawn].CFrame
             local participant = self.grandPrixClass.playersInPrix[playerObject.Name]
-            participant:moveToPoint(randomLocation)
+            participant:moveToPoint(randomLocation, true)
         end 
     end
     self = nil
@@ -89,7 +90,7 @@ function Race:connectFinishline()
             local randomSpawn = math.random(1, #LobbySpawns:GetChildren())
             local randomLocation = LobbySpawns:GetChildren()[randomSpawn].CFrame
             local participant = self.grandPrixClass.playersInPrix[playerObject.Name]
-            participant:moveToPoint(randomLocation)
+            participant:moveToPoint(randomLocation, true)
             participant:awardPoints(self.maxPointsAwarded)
             self.playersInRace[playerObject.Name].finished = true
             self.maxPointsAwarded -= 2
@@ -103,12 +104,15 @@ end
 function Race:connectKillingParts()
     for index, part in next, self.currentMap.KillingParts:GetChildren() do 
         table.insert(self.killingPartsConnections, part.Touched:Connect(function(hit)
-            local characterObject = hit.Parent 
-            local playerObject = game.Players:GetPlayerFromCharacter(characterObject)
-            if playerObject and self.playersInRace[playerObject.Name] and not self.playersInRace[playerObject.Name].finished then 
-                local participant = self.grandPrixClass.playersInPrix[playerObject.Name]
-                participant:moveToPoint(participant.lastTeleportedLocation)
-            end
+                local characterObject = hit.Parent 
+                local playerObject = game.Players:GetPlayerFromCharacter(characterObject)
+                if playerObject and self.playersInRace[playerObject.Name] and not self.playersInRace[playerObject.Name].finished and not self.playersBeingKilled[playerObject] then 
+                    self.playersBeingKilled[playerObject] = true
+                    local participant = self.grandPrixClass.playersInPrix[playerObject.Name]
+                    participant:moveToPoint(participant.lastTeleportedLocation)
+                    wait(1)
+                    self.playersBeingKilled[playerObject] = false
+                end
         end))
     end
 end 
@@ -175,7 +179,7 @@ function Race:startRace()
         repeats = 0;
         callback = function()
             for index, participant in next, self.grandPrixClass.playersInPrix do 
-                participant:changeMoveSpeed(16)
+                --participant:changeMoveSpeed(16)
                 self:connectFinishline()
                 self:connectKillingParts()
                 self:connectCheckpoints()
