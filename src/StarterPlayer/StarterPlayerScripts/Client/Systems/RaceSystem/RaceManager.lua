@@ -6,6 +6,7 @@ local StartRaceTimer = Main.getDataStream("StartRaceTimer", "RemoteEvent")
 local RaceTimeUpdater = Main.getDataStream("RaceTimeUpdater", "RemoteEvent")
 local ShowRaceStandings = Main.getDataStream("ShowRaceStandings", "RemoteEvent")
 local RaceIntermissionUpdater = Main.getDataStream("RaceIntermissionUpdater", "RemoteEvent")
+local RaceStarted = Main.getDataStream("RaceStarted", "RemoteEvent")
 
 local Timer = Main.loadLibrary("Timer")
 local RichText = Main.loadLibrary("RichText")
@@ -103,9 +104,20 @@ function RaceManager.init()
     end)
     
     RaceTimeUpdater.OnClientEvent:Connect(function(timeLeft)
-        TimerLabel.Text = timeLeft
+         local currentCounter = Interface:FindFirstChild("Counter".. tostring(timeLeft))
+         local previousCounter = Interface:FindFirstChild("Counter".. tostring(timeLeft+1))
+         if previousCounter then 
+            previousCounter.Visible = false
+        end
+         if currentCounter then 
+            currentCounter.Visible = true
+        end
+        --TimerLabel.Text = timeLeft
     end)
-
+    RaceStarted.OnClientEvent:Connect(function()
+        local Counter1 = Interface:FindFirstChild("Counter1")
+        Counter1.Visible = false
+    end)
     ShowRaceStandings.OnClientEvent:Connect(function(playersInPrix)
         showStandings(playersInPrix, "lastRecordedRaceStanding", "lastRecordedRacePoints")
         wait(3)
@@ -123,6 +135,7 @@ function RaceManager.init()
     end)
     
     RaceIntermissionUpdater.OnClientEvent:Connect(function(timeLeft, raceNumber, maxPerPrix)
+        if not timeLeft then TimerLabel.Visible = false return end
         TimerLabel.Visible = true
         local raceNumberText = RichText.new(raceNumber, {
             bold = true;

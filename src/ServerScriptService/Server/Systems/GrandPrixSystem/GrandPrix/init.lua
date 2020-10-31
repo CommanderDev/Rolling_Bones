@@ -59,11 +59,12 @@ function GrandPrix:beginNextRace()
         length = raceCooldownTimer;
         repeats = 0;
         callback = function()
+            RaceIntermissionUpdater:FireAllClients(false)
             self:createNextRace()
         end;
         subroutines = {
             Timer.new({
-                length = 0;
+                length = 1;
                 callback = function(mainroutine, subroutine)
                     RaceIntermissionUpdater:FireAllClients(mainroutine.timeLeft, self.currentStage, maxPerPrix)
                 end;

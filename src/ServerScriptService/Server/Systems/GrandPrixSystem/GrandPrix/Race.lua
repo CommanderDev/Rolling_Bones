@@ -2,6 +2,8 @@ local Main = require(game.ServerScriptService.FrameServer.Main)
 
 local StartRaceTimer = Main.getDataStream("StartRaceTimer", "RemoteEvent")
 local RaceTimeUpdater = Main.getDataStream("RaceTimeUpdater", "RemoteEvent")
+local RaceStarted = Main.getDataStream("RaceStarted", "RemoteEvent")
+
 --local RaceTimer = Main.getDataStream("RaceTimer", "RemoteEvent")
 
 local Class = Main.loadLibrary("Class")
@@ -180,11 +182,12 @@ function Race:startRace()
         callback = function()
             for index, participant in next, self.grandPrixClass.playersInPrix do 
                 --participant:changeMoveSpeed(16)
+                RaceStarted:FireAllClients()
                 self:connectFinishline()
                 self:connectKillingParts()
                 self:connectCheckpoints()
-                self:handleRaceTimer()
             end
+            self:handleRaceTimer()
         end;
         subroutines = {
             Timer.new({
