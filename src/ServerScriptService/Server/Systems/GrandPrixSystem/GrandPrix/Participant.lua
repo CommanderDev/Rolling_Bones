@@ -1,4 +1,5 @@
 local Main = require(game.ServerScriptService.FrameServer.Main)
+local Ragdoll = require(game.ServerScriptService.Server.Systems.Ragdoll.Ragdoll)
 
 local PlayerFinishedRace = Main.getDataStream("PlayerFinishedRace", "RemoteEvent")
 
@@ -81,6 +82,14 @@ function Participant:changeMoveSpeed(newSpeed)
     local humanoid = self.characterObject:WaitForChild("Humanoid")
     humanoid.WalkSpeed = newSpeed
 end 
+
+function Participant:activateRagdoll()
+    Ragdoll:Activate(self.playerObject.Character)
+end
+
+function Participant:deactiveRagdoll()
+    Ragdoll:Deactivate(self.playerObject.Character)
+end
 
 function Participant:Destroy()
     --self = nil
