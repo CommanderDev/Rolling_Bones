@@ -31,6 +31,7 @@ function IntermissionManager.init()
     IntermissionUpdater.OnClientEvent:Connect(function(timeLeft)
         if not timeLeft then 
             TimerLabel.Visible = false
+            TimerLabel.Text = ""
             return
         end
         TimerLabel.Visible = true 

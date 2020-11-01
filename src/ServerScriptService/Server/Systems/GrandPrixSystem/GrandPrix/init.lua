@@ -16,7 +16,7 @@ local Maps = Main.getPath(game.ServerStorage, "Maps")
 
 local GrandPrix = Class.new()
 
-local raceCooldownTimer = 2
+local raceCooldownTimer = 10
 local maxPerPrix = 3
 
 function GrandPrix.new()

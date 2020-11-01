@@ -14,6 +14,10 @@ function PlayerManager.init()
             print("Character added!")
             wait(1)
             Ragdoll:Activate(characterObject)
+            local LobbySpawns = workspace.LobbySpawns 
+            local randomSpawn = math.random(1, #LobbySpawns:GetChildren()) 
+            local randomSpawnLocation = LobbySpawns:GetChildren()[randomSpawn]
+            characterObject:SetPrimaryPartCFrame(randomSpawnLocation.CFrame + Vector3.new(0,5,0))
         end)
         local gameState = GameStateManager:getState()
         if gameState == "Waiting" then 
